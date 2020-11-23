@@ -15,6 +15,7 @@
 
 import grpc
 import os
+import time
 
 from ..engine import hyperparameters as hp_module
 from ..engine import trial as trial_module
@@ -68,6 +69,7 @@ class OracleClient(object):
         return trial_module.Trial.from_proto(response.trial)
 
     def update_trial(self, trial_id, metrics, step=0):
+        time.sleep(2)
         # TODO: support early stopping in multi-worker.
         if self.should_report:
             response = self.stub.UpdateTrial(service_pb2.UpdateTrialRequest(
@@ -79,6 +81,7 @@ class OracleClient(object):
         return 'RUNNING'
 
     def end_trial(self, trial_id, status="COMPLETED"):
+        time.sleep(2)
         if self.should_report:
             status = trial_module._convert_trial_status_to_proto(status)
             self.stub.EndTrial(service_pb2.EndTrialRequest(
