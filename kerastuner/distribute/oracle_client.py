@@ -53,22 +53,26 @@ class OracleClient(object):
             '`OracleClient` object has no attribute "{}"'.format(name))
 
     def get_space(self):
+        print('CLIENT get_space')
         response = self.stub.GetSpace(
             service_pb2.GetSpaceRequest(), wait_for_ready=True)
         return hp_module.HyperParameters.from_proto(response.hyperparameters)
 
     def update_space(self, hyperparameters):
+        print('CLIENT update_space')
         if self.should_report:
             self.stub.UpdateSpace(service_pb2.UpdateSpaceRequest(
                 hyperparameters=hyperparameters.to_proto()),
                 wait_for_ready=True)
 
     def create_trial(self, tuner_id):
+        print('CLIENT GetSpace')
         response = self.stub.CreateTrial(service_pb2.CreateTrialRequest(
             tuner_id=tuner_id), wait_for_ready=True)
         return trial_module.Trial.from_proto(response.trial)
 
     def update_trial(self, trial_id, metrics, step=0):
+        print('CLIENT update_trial')
         time.sleep(2)
         # TODO: support early stopping in multi-worker.
         if self.should_report:
@@ -81,6 +85,7 @@ class OracleClient(object):
         return 'RUNNING'
 
     def end_trial(self, trial_id, status="COMPLETED"):
+        print('CLIENT end_trial')
         time.sleep(2)
         if self.should_report:
             status = trial_module._convert_trial_status_to_proto(status)
@@ -88,11 +93,13 @@ class OracleClient(object):
                 trial_id=trial_id, status=status), wait_for_ready=True)
 
     def get_trial(self, trial_id):
+        print('CLIENT get_trial')
         response = self.stub.GetTrial(service_pb2.GetTrialRequest(
             trial_id=trial_id), wait_for_ready=True)
         return trial_module.Trial.from_proto(response.trial)
 
     def get_best_trials(self, num_trials=1):
+        print('CLIENT get_best_trials')
         response = self.stub.GetBestTrials(service_pb2.GetBestTrialsRequest(
             num_trials=num_trials), wait_for_ready=True)
         return [trial_module.Trial.from_proto(trial) for trial in response.trials]
