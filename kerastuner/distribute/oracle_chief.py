@@ -32,6 +32,7 @@ class OracleServicer(service_pb2_grpc.OracleServicer):
     def GetSpace(self, request, context):
         print('CHIEF GetSpace')
         hps = self.oracle.get_space()
+        print(hps.__dict__)
         return service_pb2.GetSpaceResponse(
             hyperparameters=hps.to_proto())
 
@@ -39,18 +40,24 @@ class OracleServicer(service_pb2_grpc.OracleServicer):
         print('CHIEF UpdateSpace')
         hps = hp_module.HyperParameters.from_proto(
             request.hyperparameters)
+        print(hps.__dict__)
         self.oracle.update_space(hps)
         return service_pb2.UpdateSpaceResponse()
 
     def CreateTrial(self, request, context):
         print('CHIEF CreateTrial')
+        print(request.tuner_id)
         trial = self.oracle.create_trial(request.tuner_id)
         if trial.status == trial_module.TrialStatus.STOPPED:
             self.stop_triggered = True
+        print(trial.__dict__)
         return service_pb2.CreateTrialResponse(trial=trial.to_proto())
 
     def UpdateTrial(self, request, context):
         print('CHIEF UpdateTrial')
+        print(request.trial_id)
+        print(request.metrics.__dict__)
+        print(request.step)
         status = self.oracle.update_trial(request.trial_id,
                                           request.metrics,
                                           step=request.step)
@@ -60,17 +67,21 @@ class OracleServicer(service_pb2_grpc.OracleServicer):
     def EndTrial(self, request, context):
         print('CHIEF EndTrial')
         status = trial_module._convert_trial_status_to_str(request.status)
+        print(request.trial_id)
+        print(status)
         self.oracle.end_trial(request.trial_id, status)
         return service_pb2.EndTrialResponse()
 
     def GetTrial(self, request, context):
         print('CHIEF GetTrial')
         trial = self.oracle.get_trial(request.trial_id)
+        print(trial.__proto__)
         return service_pb2.GetTrialResponse(trial=trial.to_proto())
 
     def GetBestTrials(self, request, context):
         print('CHIEF GetBestTrials')
         trials = self.oracle.get_best_trials(request.num_trials)
+        print(trials.__proto__)
         return service_pb2.GetBestTrialsResponse(
             trials=[trial.to_proto() for trial in trials])
 
